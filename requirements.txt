@@ -7,3 +7,4 @@ chromadb
 tiktoken 
 python-dotenv
 PyPDF2
+strands-agents
