@@ -45,7 +45,7 @@ import PyPDF2
 
 # LangChain components for AI and document processing
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import BedrockEmbeddings
+from langchain_aws import BedrockEmbeddings  # FIXED: Use langchain-aws instead of langchain-community
 from langchain_community.vectorstores import Chroma
 from langchain_aws import ChatBedrockConverse
 from langchain.chains import RetrievalQA
@@ -75,15 +75,17 @@ CHROMA_DIR = os.path.join(TEMP_DIR, "chroma_db")
 
 # atexit.register(cleanup_temp_dir)
 
-# AWS Bedrock model IDs - these are the AI models we'll use
+# --- CONFIGURATION CONSTANTS (FIXED) ---
+# AWS Bedrock model IDs - UPDATED to use inference profiles
 AWS_BEDROCK_EMBEDDING_MODEL_ID = "amazon.titan-embed-text-v1"  # For converting text to vectors
-AWS_BEDROCK_LLM_MODEL_ID = "us.amazon.nova-micro-v1:0"          # For answering questions
-AWS_REGION = "us-west-2"  # AWS region where Bedrock is available
+AWS_BEDROCK_LLM_MODEL_ID = "us.anthropic.claude-3-haiku-20240307-v1:0"  # FIXED: Use inference profile ID
+AWS_EMBEDDING_REGION = "us-east-1"  # FIXED: Embeddings only available here
+AWS_LLM_REGION = "us-east-2"  # LLM region (your default)
 
-# --- AI COMPONENTS INITIALIZATION ---
-# Initialize the embedding model (converts text to numerical vectors for similarity search)
+# --- AI COMPONENTS INITIALIZATION (FIXED) ---
+# Initialize the embedding model (FIXED: Use correct region and import)
 embedding_model = BedrockEmbeddings(
-    region_name="us-west-2",
+    region_name=AWS_EMBEDDING_REGION,  # FIXED: Use us-east-1
     model_id=AWS_BEDROCK_EMBEDDING_MODEL_ID
 )
 
@@ -494,12 +496,10 @@ elif page == "Ask Questions":
             # Step 1: Set up retriever (top 3 chunks)
             retriever = st.session_state.vectorstore.as_retriever(search_kwargs={"k": 3})
 
-            # Step 2: Initialize the Bedrock LLM (completion-style)
-            from langchain_community.llms import Bedrock
-
+            # Step 2: Initialize the Bedrock LLM (FIXED)
             llm = ChatBedrockConverse(
-                region_name=AWS_REGION,
-                model_id=AWS_BEDROCK_LLM_MODEL_ID
+                region_name=AWS_LLM_REGION,  # Use us-east-2 
+                model_id=AWS_BEDROCK_LLM_MODEL_ID  # FIXED: Use inference profile ID
             )
 
             # Step 3: Text input for question
